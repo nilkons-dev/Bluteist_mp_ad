@@ -8,6 +8,8 @@
  * Run after `vite build` (which empties dist/).
  */
 import { build } from "esbuild";
+import * as acorn from "acorn";
+import { collectPropertyNames, generateData, rewriteRegexLiterals } from "./unicode-compat.mjs";
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -78,6 +80,25 @@ await build({
   minify: false, // readable stack traces matter more than 1 MB here
 });
 
+/*
+ * The Node inside Android is built without ICU: a regex literal with a property escape (\p{L}) is a SyntaxError there
+ * and stops the whole file from loading. Rewrite them into `new RegExp(...)` calls (the runtime layer expands them),
+ * then prove none are left.
+ */
+const propertyNames = new Set();
+function rewriteFile(file) {
+  const code = readFileSync(file, "utf8");
+  if (!/\\[pP]\{/.test(code)) return 0;
+  collectPropertyNames(code, propertyNames);
+  const { code: out, count } = rewriteRegexLiterals(code, acorn);
+  if (count) writeFileSync(file, out);
+  // Idempotence check: a second pass must find nothing left to rewrite.
+  if (rewriteRegexLiterals(out, acorn).count !== 0) throw new Error(`${file}: regex literals with \\p{...} remain after rewriting`);
+  return count;
+}
+const bundleLiterals = rewriteFile(join(out, "backend.js"));
+console.log(`[android-backend] rewrote ${bundleLiterals} regex literal(s) with Unicode property escapes in backend.js`);
+
 /**
  * index.js is a tiny loader, the file nodejs-mobile actually starts. It exists so that a failure while the real
  * backend (backend.js) is being loaded — a library that dislikes this Node, a missing file — can never take the
@@ -139,6 +160,29 @@ if (!skipInstall) {
   });
   prune(join(out, "node_modules"));
 }
+
+/** Same rewrite for the libraries that ship as real files (jsdom and its dependencies). */
+function rewriteTree(dir) {
+  if (!existsSync(dir)) return 0;
+  let n = 0;
+  for (const name of readdirSync(dir)) {
+    const p = join(dir, name);
+    const st = statSync(p);
+    if (st.isDirectory()) n += rewriteTree(p);
+    else if (/\.(c|m)?js$/.test(name)) n += rewriteFile(p);
+  }
+  return n;
+}
+const treeLiterals = rewriteTree(join(out, "node_modules"));
+console.log(`[android-backend] rewrote ${treeLiterals} regex literal(s) in node_modules`);
+
+// Code-point ranges for the properties used (+ a standard set) and normalization tables, from this full-ICU Node.
+const unicodeData = generateData([...propertyNames]);
+writeFileSync(join(out, "unicode-data.json"), JSON.stringify(unicodeData));
+console.log(
+  `[android-backend] unicode-data.json: ${Object.keys(unicodeData.props).length} properties, ` +
+    `${(statSync(join(out, "unicode-data.json")).size / 1024).toFixed(0)} KB`
+);
 
 /** Drop what a running jsdom never reads: docs, tests, type declarations, source maps, markdown. */
 function prune(dir) {

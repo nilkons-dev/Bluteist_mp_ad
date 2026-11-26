@@ -4,6 +4,9 @@
  * runs before any of them is evaluated. Every shim is feature-detected: on a newer Node it does nothing.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import "./unicode"; // property-escape regexes, normalize, TextDecoder labels (the embedded Node has no ICU)
+import "./intl-shim"; // the Intl object, which that Node lacks entirely
+
 const g = globalThis as any;
 
 function define(target: any, name: string, value: unknown): void {

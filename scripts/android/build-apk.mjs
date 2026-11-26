@@ -27,6 +27,8 @@ process.env.BYTUNE_TARGET = "android";
 run(process.execPath, [join(root, "scripts/android/install-nodejs-plugin.mjs")]);
 run(npx, ["vite", "build"]);
 run(process.execPath, [join(root, "scripts/android/build-backend.mjs")]);
+// Boot the built backend once, here, so a broken engine fails in a minute instead of after the Gradle build.
+run(process.execPath, [join(root, "scripts/android/smoke-backend.mjs")]);
 if (!existsSync(join(root, "android", "app"))) run(npx, ["cap", "add", "android"]);
 run(process.execPath, [join(root, "scripts/android/patch-android.mjs")]);
 run(npx, ["cap", "sync", "android"]);

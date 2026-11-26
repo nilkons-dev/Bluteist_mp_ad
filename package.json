@@ -30,7 +30,8 @@
     "android:build:debug": "node scripts/android/build-apk.mjs --debug",
     "android:sync": "node scripts/android/build-apk.mjs --no-gradle",
     "android:open": "npx cap open android",
-    "android:plugin": "node scripts/android/install-nodejs-plugin.mjs"
+    "android:plugin": "node scripts/android/install-nodejs-plugin.mjs",
+    "android:smoke": "node scripts/android/smoke-backend.mjs"
   },
   "build": {
     "appId": "com.blutheist.music",
@@ -149,6 +150,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "acorn": "^8.14.0",
     "autoprefixer": "^10.4.20",
     "concurrently": "^9.1.0",
     "cross-env": "^7.0.3",

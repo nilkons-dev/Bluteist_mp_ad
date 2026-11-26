@@ -213,7 +213,14 @@ function diagnostics(): Record<string, unknown> {
     rssMb: Math.round(process.memoryUsage().rss / 1048576),
     totalMemMb: Math.round(os.totalmem() / 1048576),
     freeMemMb: Math.round(os.freemem() / 1048576),
-    cpus: os.cpus().length,
+    icu: typeof process.versions.icu === "string",
+    cpus: ((): number => {
+      try {
+        return os.cpus().length; // can throw or return [] on locked-down Android builds
+      } catch {
+        return 0;
+      }
+    })(),
     dataDir: i.dataDir,
     musicDir: i.musicDir,
   };
@@ -639,6 +646,9 @@ function registerIpc(): void {
 /* ------------------------------------------------------------------ boot */
 
 async function boot(): Promise<void> {
+  // Android's Node has no usable HOME, and os.tmpdir() falls back to /data/local/tmp (not writable by apps).
+  process.env.TMPDIR = init().cacheDir;
+  process.env.HOME ||= init().dataDir;
   // The same start-up sequence as electron/main.ts's app.whenReady(), minus windows.
   persist.migrateLegacyData();
   transition.initializeOwner();
