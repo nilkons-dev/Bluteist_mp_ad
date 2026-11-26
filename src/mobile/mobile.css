@@ -1,0 +1,483 @@
+/* ==========================================================================================
+   Blutheist for Android — phone layout. Everything is scoped to html.platform-android, so the
+   desktop build is untouched. Components and animations are the app's own; this file only
+   rearranges them for a narrow, touch-driven screen and trims the costliest GPU effects on
+   older phones (html.perf-low / perf-mid, see mobile/env.ts).
+   ========================================================================================== */
+
+html.platform-android {
+  --sat: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
+  --sab: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
+  --sal: max(env(safe-area-inset-left, 0px), var(--safe-area-inset-left, 0px));
+  --sar: max(env(safe-area-inset-right, 0px), var(--safe-area-inset-right, 0px));
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  touch-action: manipulation; /* no double-tap zoom delay */
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+html.platform-android,
+html.platform-android body,
+html.platform-android #root {
+  height: 100%;
+  background: #000;
+}
+html.platform-android body {
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+}
+html.platform-android * {
+  -webkit-touch-callout: none;
+}
+html.platform-android input,
+html.platform-android textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* ---------------------------------------------------------------- shell */
+.platform-android .m-shell {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  padding: var(--sat) var(--sar) 0 var(--sal);
+  background: #000;
+  overflow: hidden;
+}
+.platform-android .m-body {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 6px;
+}
+.platform-android .m-panel {
+  border-radius: 18px;
+  min-height: 0;
+}
+.platform-android .m-tap {
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+}
+.platform-android .m-tap:active {
+  transform: scale(0.94);
+}
+.platform-android .m-safe-bottom {
+  padding-bottom: max(12px, var(--sab));
+}
+
+/* pages: phone gutters instead of the desktop's 40px */
+.platform-android .view-page {
+  padding-left: 14px !important;
+  padding-right: 14px !important;
+  padding-top: 12px !important;
+  padding-bottom: 20px !important;
+}
+.platform-android .m-shell [class*="max-w-[1600px]"] {
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
+/* ---------------------------------------------------------------- top bar (the real TopBar, compacted) */
+.platform-android .chrome-glass.app-drag {
+  height: auto;
+  min-height: 52px;
+  flex-wrap: wrap;
+  align-content: center;
+  padding: 6px 8px 8px 8px;
+  gap: 4px 2px;
+}
+.platform-android .tb-x,
+.platform-android .sx-home {
+  display: none !important;
+}
+/* brand + back on the first row, profile on the right … */
+.platform-android .chrome-glass.app-drag > .ml-auto {
+  order: 2;
+  margin-left: auto;
+}
+.platform-android .chrome-glass.app-drag > .shrink-0:first-child {
+  order: 1;
+}
+/* … and the search field gets the whole second row */
+.platform-android .tb-centre {
+  order: 3;
+  flex: 1 0 100%;
+  width: 100%;
+  height: auto;
+  min-height: 44px;
+  justify-content: stretch;
+}
+.platform-android .sx-search {
+  max-width: none;
+  min-width: 0;
+  flex: 1 1 100%;
+}
+.platform-android .sx-input {
+  font-size: 16px;
+}
+.platform-android .av-who-name {
+  display: none;
+}
+/* Search dropdowns span the row and fit above the keyboard */
+.platform-android .sx-search .menu.absolute {
+  max-height: min(58dvh, 440px) !important;
+}
+
+/* ---------------------------------------------------------------- mini player */
+.platform-android .m-mini {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: 60px;
+  margin: 6px 8px 4px;
+  padding: 0 6px 0 6px;
+  border-radius: 16px;
+  background: rgb(30 30 33 / 0.97);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.07), 0 8px 24px -8px rgb(0 0 0 / 0.7);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.platform-android .m-mini-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+.platform-android .m-mini-art {
+  width: 46px;
+  height: 46px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #242428;
+}
+.platform-android .m-mini-meta {
+  min-width: 0;
+  flex: 1 1 0;
+}
+.platform-android .m-mini-ctl {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.platform-android .m-mini-btn,
+.platform-android .m-mini-play {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: none;
+  color: #fff;
+  border-radius: 999px;
+}
+.platform-android .m-mini-play {
+  background: #fff;
+  color: #000;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  margin: 0 2px;
+}
+.platform-android .m-mini-play.is-loading {
+  animation: m-pulse 1s ease-in-out infinite;
+}
+.platform-android .m-mini-bar {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 0;
+  height: 2px;
+  background: rgb(255 255 255 / 0.12);
+  border-radius: 2px;
+}
+.platform-android .m-mini-fill {
+  height: 100%;
+  background: #fff;
+  border-radius: 2px;
+  transition: width 0.25s linear;
+}
+@keyframes m-pulse {
+  50% {
+    opacity: 0.55;
+  }
+}
+
+/* ---------------------------------------------------------------- bottom tabs */
+.platform-android .m-nav {
+  display: flex;
+  flex-shrink: 0;
+  align-items: stretch;
+  height: calc(56px + var(--sab));
+  padding-bottom: var(--sab);
+  background: rgb(0 0 0 / 0.96);
+  border-top: 1px solid rgb(255 255 255 / 0.07);
+}
+.platform-android .kb-open .m-nav,
+.platform-android .kb-open .m-mini {
+  display: none;
+}
+.platform-android .m-tab {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: none;
+  border: 0;
+  color: rgb(255 255 255 / 0.5);
+  transition: color 0.2s;
+}
+.platform-android .m-tab.is-on {
+  color: #fff;
+}
+.platform-android .m-tab-ico {
+  display: grid;
+  place-items: center;
+  height: 24px;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.platform-android .m-tab.is-on .m-tab-ico {
+  transform: translateY(-1px) scale(1.12);
+}
+.platform-android .m-tab-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* ---------------------------------------------------------------- drawer (the Your-Library panel) */
+.platform-android .m-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  visibility: hidden;
+  pointer-events: none;
+  transition: visibility 0s linear 0.3s;
+}
+.platform-android .m-drawer.is-open {
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+.platform-android .m-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.6);
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+.platform-android .m-drawer.is-open .m-scrim,
+.platform-android .m-sheet-wrap .m-scrim {
+  opacity: 1;
+}
+.platform-android .m-drawer-panel {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(88vw, 360px);
+  display: flex;
+  flex-direction: column;
+  padding: var(--sat) 0 var(--sab) var(--sal);
+  background: rgb(var(--base));
+  box-shadow: 0 0 60px rgb(0 0 0 / 0.7);
+  transform: translateX(-102%);
+  transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
+  will-change: transform;
+}
+.platform-android .m-drawer.is-open .m-drawer-panel {
+  transform: none;
+}
+.platform-android .m-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 8px 18px;
+}
+.platform-android .m-drawer-body {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  padding: 0 8px 8px;
+}
+.platform-android .m-drawer-body .lb-aside {
+  width: 100% !important;
+  flex: 1 1 auto;
+}
+.platform-android .m-drawer-body .lb-grip {
+  display: none;
+}
+
+/* ---------------------------------------------------------------- queue / room sheet */
+.platform-android .m-sheet-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 160;
+}
+.platform-android .m-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: min(82dvh, 720px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px 24px 0 0;
+  background: rgb(18 18 20);
+  box-shadow: 0 -12px 50px rgb(0 0 0 / 0.6);
+  padding-bottom: var(--sab);
+  overflow: hidden;
+  transition: transform 0.25s ease;
+}
+.platform-android .m-sheet-grab {
+  display: grid;
+  place-items: center;
+  height: 28px;
+  flex-shrink: 0;
+  touch-action: none;
+}
+.platform-android .m-sheet-grab span {
+  width: 40px;
+  height: 4px;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 0.28);
+}
+.platform-android .m-sheet > aside {
+  width: 100% !important;
+  flex: 1 1 0;
+  min-height: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------- Now Playing */
+.platform-android .m-np-dock {
+  height: auto !important;
+  padding: 4px 14px calc(8px + var(--sab));
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.platform-android .m-np-transport {
+  width: 100%;
+}
+.platform-android .m-np-extras .ex {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.platform-android .m-np-extras .ex-vwrap,
+.platform-android .m-np-extras [aria-label$="Miniplayer"],
+.platform-android .m-np-extras [aria-label$="Full screen"] {
+  display: none !important;
+}
+
+/* ---------------------------------------------------------------- menus become bottom sheets */
+.platform-android .menu.fixed {
+  left: 8px !important;
+  right: 8px !important;
+  top: auto !important;
+  bottom: calc(8px + var(--sab)) !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  max-height: 68dvh !important;
+  transform: none !important;
+  border-radius: 20px;
+  overflow-y: auto;
+}
+.platform-android .menu.fixed [data-menu-row],
+.platform-android .menu.fixed button {
+  min-height: 46px;
+}
+
+/* ---------------------------------------------------------------- toasts, dialogs, small layouts */
+.platform-android .toast-beacon {
+  min-width: 0 !important;
+  max-width: calc(100vw - 24px) !important;
+}
+.platform-android [class*="top-[78px]"][class*="z-[110]"] {
+  top: calc(var(--sat) + 64px);
+}
+.platform-android .stack-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 14px;
+}
+.platform-android .rw {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px 14px;
+}
+.platform-android .st-layout {
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 14px;
+}
+.platform-android .rp-share {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  max-height: 92dvh;
+  overflow-y: auto;
+}
+.platform-android [class*="[grid-template-columns:repeat(auto-fill,minmax(300px,1fr))]"] {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+.platform-android [class*="w-[420px]"] {
+  width: min(420px, calc(100vw - 24px));
+}
+.platform-android .no-scrollbar {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* rows: no hover on touch, so the hover-only controls (the ⋯ buttons) show all the time */
+@media (hover: none) {
+  .platform-android .group .opacity-0.group-hover\:opacity-100,
+  .platform-android .opacity-0.group-hover\:opacity-100 {
+    opacity: 1;
+  }
+}
+
+/* ---------------------------------------------------------------- performance tiers
+   Every animation and feature stays; only the priciest GPU work is trimmed on weaker phones. */
+html.perf-low [class*="blur-[100px]"],
+html.perf-mid [class*="blur-[100px]"] {
+  filter: blur(34px) brightness(0.78) saturate(1.25) !important;
+}
+html.perf-low .m-mini,
+html.perf-low .m-sheet,
+html.perf-low .m-drawer-panel {
+  box-shadow: none;
+}
+html.perf-low .animate-drift,
+html.perf-low [class*="animate-drift"] {
+  animation-duration: 90s !important;
+}
+html.perf-low .toast-sheen {
+  display: none;
+}
+html.perf-low * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+/* Respect Android's own "remove animations" accessibility switch */
+@media (prefers-reduced-motion: reduce) {
+  .platform-android .m-drawer-panel,
+  .platform-android .m-sheet,
+  .platform-android .m-scrim {
+    transition: none;
+  }
+}
