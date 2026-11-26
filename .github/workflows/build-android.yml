@@ -40,7 +40,10 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - uses: android-actions/setup-android@v3
+      # The runner already ships the Android SDK (ANDROID_HOME). Gradle downloads any missing platform itself,
+      # as long as the licences are accepted.
+      - name: Accept Android SDK licenses
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
 
       - name: Install dependencies
         # The lockfile predates the Capacitor packages, so `npm install` (not `ci`) refreshes it.
