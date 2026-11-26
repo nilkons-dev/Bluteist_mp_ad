@@ -49,6 +49,11 @@ jobs:
         # The lockfile predates the Capacitor packages, so `npm install` (not `ci`) refreshes it.
         run: npm install --legacy-peer-deps --no-audit --no-fund
 
+      - name: Install the real capacitor-nodejs plugin (GitHub release)
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/android/install-nodejs-plugin.mjs
+
       - name: Optional release keystore from repository secrets
         env:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}

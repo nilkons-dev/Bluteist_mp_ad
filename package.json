@@ -29,7 +29,8 @@
     "android:build": "node scripts/android/build-apk.mjs",
     "android:build:debug": "node scripts/android/build-apk.mjs --debug",
     "android:sync": "node scripts/android/build-apk.mjs --no-gradle",
-    "android:open": "npx cap open android"
+    "android:open": "npx cap open android",
+    "android:plugin": "node scripts/android/install-nodejs-plugin.mjs"
   },
   "build": {
     "appId": "com.blutheist.music",
@@ -176,7 +177,6 @@
     "@jofr/capacitor-media-session": "latest",
     "@supabase/supabase-js": "^2.116.0",
     "bgutils-js": "^4.0.3",
-    "capacitor-nodejs": "latest",
     "electron-updater": "^6.8.11",
     "jsdom": "^29.1.1",
     "music-metadata": "^11.15.0"

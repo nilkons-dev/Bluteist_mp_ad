@@ -23,6 +23,8 @@ function run(cmd, args, cwd = root) {
 const npx = win ? "npx.cmd" : "npx";
 process.env.BYTUNE_TARGET = "android";
 
+// The real capacitor-nodejs comes from a GitHub release (npm's "latest" is a broken placeholder); vite needs it too.
+run(process.execPath, [join(root, "scripts/android/install-nodejs-plugin.mjs")]);
 run(npx, ["vite", "build"]);
 run(process.execPath, [join(root, "scripts/android/build-backend.mjs")]);
 if (!existsSync(join(root, "android", "app"))) run(npx, ["cap", "add", "android"]);

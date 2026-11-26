@@ -59,7 +59,6 @@ const write = (p, s) => {
   setAppAttr("android:usesCleartextTraffic", "true"); // the loopback stream server is plain http://127.0.0.1
   setAppAttr("android:largeHeap", "true");
   setAppAttr("android:hardwareAccelerated", "true");
-  setAppAttr("android:extractNativeLibs", "true");
 
   const setActAttr = (name, value) => {
     const re = new RegExp(`(<activity\\b[^>]*?)\\s${name.replace(":", "\\:")}="[^"]*"`);
