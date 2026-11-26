@@ -68,4 +68,18 @@ public class BlutheistNative extends Plugin {
     private void notificationsCallback(PluginCall call) {
         respond(call, getPermissionState("notifications") == PermissionState.GRANTED);
     }
+
+    /** The recorded crash report (empty when the last run ended normally). */
+    @PluginMethod
+    public void lastCrash(PluginCall call) {
+        JSObject ret = new JSObject();
+        ret.put("text", CrashLog.read(getContext()));
+        call.resolve(ret);
+    }
+
+    @PluginMethod
+    public void clearLastCrash(PluginCall call) {
+        CrashLog.clear(getContext());
+        call.resolve();
+    }
 }

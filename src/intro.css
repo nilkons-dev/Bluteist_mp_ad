@@ -158,3 +158,14 @@ html.intro:not(.intro-wait) #intro {
   transform: translate(-50%, -50%) scaleX(0);
   will-change: transform, opacity;
 }
+
+/* Phones and other narrow screens: the logo and the wordmark are a little smaller, so the show sits comfortably
+   in the frame. (The hand-over measures the real boxes, so nothing else depends on these sizes.) */
+@media (max-width: 700px), (pointer: coarse) and (max-width: 1024px) {
+  .intro-stack {
+    width: min(64vw, 40vh, 340px);
+  }
+  .intro-wmbox {
+    padding: 14px 9% 8px;
+  }
+}

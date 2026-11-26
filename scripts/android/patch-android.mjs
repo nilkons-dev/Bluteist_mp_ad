@@ -89,6 +89,7 @@ const write = (p, s) => {
   mkdirSync(dir, { recursive: true });
   cpSync(join(root, "scripts/android/native/BlutheistNative.java"), join(dir, "BlutheistNative.java"));
   cpSync(join(root, "scripts/android/native/MainActivity.java"), join(dir, "MainActivity.java"));
+  cpSync(join(root, "scripts/android/native/CrashLog.java"), join(dir, "CrashLog.java"));
 }
 
 /* ------------------------------------------------------------------ gradle */

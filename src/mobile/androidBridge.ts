@@ -23,6 +23,8 @@ interface NativePlugin {
   audioPermission(): Promise<{ granted: boolean }>;
   requestAudioPermission(): Promise<{ granted: boolean }>;
   requestNotifications(): Promise<{ granted: boolean }>;
+  lastCrash(): Promise<{ text: string }>;
+  clearLastCrash(): Promise<void>;
 }
 const Native = registerPlugin<NativePlugin>("BlutheistNative");
 
@@ -430,4 +432,7 @@ export const androidNative = {
   listDir: (dir: string) =>
     invoke<{ path: string; parent: string | null; dirs: Array<{ name: string; path: string; audio: number }>; audioCount: number; readable: boolean }>("android:listDir", dir),
   requestNotifications: () => Native.requestNotifications().catch(() => ({ granted: false })),
+  /** What went wrong the last time the app died (empty when it ended normally). */
+  lastCrash: (): Promise<string> => Native.lastCrash().then((r) => r.text || "").catch(() => ""),
+  clearLastCrash: (): Promise<void> => Native.clearLastCrash().catch(() => undefined),
 };

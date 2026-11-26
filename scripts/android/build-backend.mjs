@@ -52,6 +52,8 @@ const aliasPlugin = {
       const r = await b.resolve("@supabase/supabase-js", { resolveDir: root, kind: args.kind, pluginData: "real" });
       return r.errors.length ? { errors: r.errors } : { path: r.path };
     });
+    // Only the Windows installer path (never reached on Android) imports it.
+    b.onResolve({ filter: /^electron-updater$/ }, () => ({ path: shim("empty.ts") }));
     // The Electron API surface the shared modules touch.
     b.onResolve({ filter: /^electron$/ }, () => ({ path: join(root, "android-backend/src/electron-shim.ts") }));
   },
@@ -59,7 +61,7 @@ const aliasPlugin = {
 
 await build({
   entryPoints: [join(root, "android-backend/src/main.ts")],
-  outfile: join(out, "index.js"),
+  outfile: join(out, "backend.js"),
   bundle: true,
   platform: "node",
   format: "cjs",
@@ -75,6 +77,42 @@ await build({
   legalComments: "none",
   minify: false, // readable stack traces matter more than 1 MB here
 });
+
+/**
+ * index.js is a tiny loader, the file nodejs-mobile actually starts. It exists so that a failure while the real
+ * backend (backend.js) is being loaded — a library that dislikes this Node, a missing file — can never take the
+ * whole app down: it is caught here and reported to the page, which shows it instead of vanishing.
+ */
+writeFileSync(
+  join(out, "index.js"),
+  `"use strict";
+var loadError = null;
+function describe(e) { return e && e.stack ? String(e.stack) : String(e); }
+process.on("uncaughtException", function (e) { try { console.error("[blutheist] uncaught:", describe(e)); } catch (_) {} });
+process.on("unhandledRejection", function (e) { try { console.warn("[blutheist] unhandled rejection:", describe(e)); } catch (_) {} });
+try {
+  require("./backend.js");
+} catch (e) {
+  loadError = describe(e);
+  try { console.error("[blutheist] backend failed to load:", loadError); } catch (_) {}
+}
+if (loadError) {
+  try {
+    var bridge = require("bridge");
+    var ch = bridge.channel || bridge;
+    var add = ch.addListener || ch.on;
+    var send = ch.send || ch.post;
+    var tell = function () {
+      try {
+        send.call(ch, "msg", JSON.stringify({ t: "fatal", message: "The backend failed to load: " + loadError.slice(0, 1800) }));
+      } catch (_) {}
+    };
+    add.call(ch, "msg", tell); // answers the page's first message, whenever it arrives
+    tell();
+  } catch (_) {}
+}
+`
+);
 
 writeFileSync(
   join(out, "package.json"),
@@ -133,5 +171,5 @@ function sizeOf(p) {
   return readdirSync(p).reduce((n, f) => n + sizeOf(join(p, f)), 0);
 }
 
-const size = statSync(join(out, "index.js")).size;
-console.log(`[android-backend] dist/nodejs/index.js ${(size / 1048576).toFixed(2)} MB`);
+const size = statSync(join(out, "backend.js")).size;
+console.log(`[android-backend] dist/nodejs/backend.js ${(size / 1048576).toFixed(2)} MB (+ index.js loader)`);

@@ -9,6 +9,7 @@
  * The music/lyrics/stream/download/stats/sync modules are the SAME files the desktop app uses
  * (electron/*.ts); `electron` resolves to ./electron-shim at bundle time.
  */
+import "./polyfills"; // must stay first: fills in APIs the embedded Node lacks
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
